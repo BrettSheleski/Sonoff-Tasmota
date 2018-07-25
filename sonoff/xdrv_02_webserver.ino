@@ -210,6 +210,7 @@ const char HTTP_BTN_MENU4[] PROGMEM =
 #endif  // USE_KNX
   "<br/><form action='lg' method='get'><button>" D_CONFIGURE_LOGGING "</button></form>"
   "<br/><form action='co' method='get'><button>" D_CONFIGURE_OTHER "</button></form>"
+  "<br/><form action='st' method='get'><button>Configure SmartThings</button></form>"
   "<br/>"
   "<br/><form action='rt' method='get' onsubmit='return confirm(\"" D_CONFIRM_RESET_CONFIGURATION "\");'><button class='button bred'>" D_RESET_CONFIGURATION "</button></form>"
   "<br/><form action='dl' method='get'><button>" D_BACKUP_CONFIGURATION "</button></form>"
@@ -399,6 +400,7 @@ void StartWebserver(int type, IPAddress ipweb)
 #endif // USE_KNX
       WebServer->on("/lg", HandleLoggingConfiguration);
       WebServer->on("/co", HandleOtherConfiguration);
+      WebServer->on("/st", HandleSmartThingsConfiguration);
       WebServer->on("/dl", HandleBackupConfiguration);
       WebServer->on("/sv", HandleSaveSettings);
       WebServer->on("/rs", HandleRestoreConfiguration);
@@ -973,6 +975,14 @@ void HandleOtherConfiguration()
 #endif  // USE_EMULATION
   page += FPSTR(HTTP_FORM_END);
   page += FPSTR(HTTP_BTN_CONF);
+  ShowPage(page);
+}
+void HandleSmartThingsConfiguration()
+{
+  if (HttpUser()) { return; }
+ // AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_CONFIGURE_OTHER);
+
+  String page = FPSTR(HTTP_HEAD);
   ShowPage(page);
 }
 
