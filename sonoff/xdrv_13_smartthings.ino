@@ -20,5 +20,8 @@
 
 #ifdef USE_SMARTTHINGS
 
+void SmartThings_Post(const char* topic, const char* str){
+    
+}
 
 #endif // USE_SMARTTHINGS

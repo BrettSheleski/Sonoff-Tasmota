@@ -233,6 +233,10 @@ void MqttPublishDirect(const char* topic, boolean retained)
   }
 
   yield();  // #3313
+
+  #ifdef USE_SMARTTHINGS
+  SmartThings_Post(topic, mqtt_data);
+  #endif
 }
 
 void MqttPublish(const char* topic, boolean retained)
@@ -272,6 +276,7 @@ void MqttPublishPrefixTopic_P(uint8_t prefix, const char* subtopic, boolean reta
   prefix &= 3;
   GetTopic_P(stopic, prefix, mqtt_topic, romram);
   MqttPublish(stopic, retained);
+ 
 }
 
 void MqttPublishPrefixTopic_P(uint8_t prefix, const char* subtopic)

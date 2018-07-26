@@ -330,6 +330,12 @@ struct SYSCFG {
   char          rules[MAX_RULE_SETS][MAX_RULE_SIZE]; // 800 uses 512 bytes in v5.12.0m, 3 x 512 bytes in v5.14.0b
 
                                            // E00 - FFF free locations
+
+  char          smartthings_access_token[32];   // E00 - E20  stores guid, (without dashes) needs to be added back in when in use
+  char          smartthings_base_url[64];       // E21 - E61  eg:  https://graph-na02-useast1.api.smartthings.com:443
+  char          smartthings_url[72];            // ??? - ???  eg:  /api/smartapps/installations/9593aaed-1513-4d30-9ae3-f2cd4e11a2e2
+  char          smartthings_smartapp_path[64];  // ??? - ???  eg:  DoIt
+
 } Settings;
 
 struct RTCMEM {
