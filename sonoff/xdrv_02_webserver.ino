@@ -210,7 +210,9 @@ const char HTTP_BTN_MENU4[] PROGMEM =
 #endif  // USE_KNX
   "<br/><form action='lg' method='get'><button>" D_CONFIGURE_LOGGING "</button></form>"
   "<br/><form action='co' method='get'><button>" D_CONFIGURE_OTHER "</button></form>"
+  #ifdef USE_SMARTTHINGS
   "<br/><form action='st' method='get'><button>Configure SmartThings</button></form>"
+  #endif //USE_SMARTTHINGS
   "<br/>"
   "<br/><form action='rt' method='get' onsubmit='return confirm(\"" D_CONFIRM_RESET_CONFIGURATION "\");'><button class='button bred'>" D_RESET_CONFIGURATION "</button></form>"
   "<br/><form action='dl' method='get'><button>" D_BACKUP_CONFIGURATION "</button></form>"
@@ -316,13 +318,14 @@ const char HTTP_END[] PROGMEM =
   "</body>"
   "</html>";
 
-
+#ifdef USE_SMARTTHINGS
+  
 const char HTTP_SMARTTHINGS_SUMMARY[] PROGMEM = "<fieldset><legend>SmartApp Information</legend><form method='POST'><div><label for='ep'>Endpoint</label>"
   "<input type='text' id='ep' placeholder='SmartApp endpoint URL'/></div><div><label for='at'>Access Token</label>"
   "<input type='text' id='at' placeholder='OAuth Access Token'/></div><div><label for='pt'>Path</label><input type='text' id='pt' placeholder='SmartApp mapped path'/>"
   "</div><button type='submit'> Save </button></form></fieldset><br/><form method='GET' action='st1'><button type='submit'> Get Access Token </button></form><br/>";
 
-  const char HTTP_SMARTTHINGS_ST1[] PROGMEM = "<script>function processForm(){var clientId=document.getElementById('clientId').value; document."
+const char HTTP_SMARTTHINGS_ST1[] PROGMEM = "<script>function processForm(){var clientId=document.getElementById('clientId').value; document."
     "getElementById('redirectUri').value=window.location.href.split('?')[0].replace('/st1', '/st2') + '?clientId=' + clientId;}function pl(){"
     "var form=document.getElementById('getCodeForm'); if (form.attachEvent){form.attachEvent('submit', processForm);}else{form.addEventListener('submit', processForm);}}"
     "</script><fieldset><legend>SmartApp Information</legend><form method='GET' action='https://graph.api.smartthings.com/oauth/authorize' id='getCodeForm'>"
@@ -331,7 +334,7 @@ const char HTTP_SMARTTHINGS_SUMMARY[] PROGMEM = "<fieldset><legend>SmartApp Info
     "<input name='client_id' type='text' class='form-control' id='clientId' required placeholder='The OAuth client ID of the SmartApp.'>"
     "<div><button type='submit' class='btn btn-primary'> Submit </button></div></form></fieldset>";
 
-  const char HTTP_SMARTTHINGS_ST2[] PROGMEM = "<script>function getQueryParameters(str){return (str || document.location.search).replace(/(^\?)/, '').split('&')"
+const char HTTP_SMARTTHINGS_ST2[] PROGMEM = "<script>function getQueryParameters(str){return (str || document.location.search).replace(/(^\?)/, '').split('&')"
   ".map(function (n){return n=n.split('='), this[n[0]]=n[1], this}.bind({}))[0];}function handlePageLoad(){var qp=getQueryParameters(); document.getElementById('oauthCode')"
   ".value=qp.code; document.getElementById('clientId').value=qp.clientId; document.getElementById('redirectUri').value=window.location.href.split('?')[0] + "
   "'?clientId=' + qp.clientId;}</script><fieldset><legend>SmartApp Information</legend><form method='POST'><input name='client_id' type='hidden' id='clientId'/>"
@@ -339,6 +342,7 @@ const char HTTP_SMARTTHINGS_SUMMARY[] PROGMEM = "<fieldset><legend>SmartApp Info
   "<input name='client_secret' type='text' id='clientSecret' required placeholder='The OAuth client secret of the SmartApp.'/><label for='clientSecret'>"
   "SmartApp function path</label><input name='path' type='text' required placeholder='The mapped path of the SmartApp function.'/><button type='submit'>"
   "Submit</button></form></fieldset>";
+#endif //USE_SMARTTHINGS
 
 const char HTTP_DEVICE_CONTROL[] PROGMEM = "<td style='width:%d%%'><button onclick='la(\"?o=%d\");'>%s%s</button></td>";
 const char HTTP_DEVICE_STATE[] PROGMEM = "%s<td style='width:%d{c}%s;font-size:%dpx'>%s</div></td>";  // {c} = %'><div style='text-align:center;font-weight:
@@ -424,11 +428,13 @@ void StartWebserver(int type, IPAddress ipweb)
 #endif // USE_KNX
       WebServer->on("/lg", HandleLoggingConfiguration);
       WebServer->on("/co", HandleOtherConfiguration);
+#ifdef USE_SMARTTHINGS
       WebServer->on("/st", HTTP_GET, HandleSmartThingsSummary_GET);
       WebServer->on("/st", HTTP_POST, HandleSmartThingsSummary_POST);
       WebServer->on("/st1", HandleSmartThingsStep1);
       WebServer->on("/st2", HTTP_GET, HandleSmartThingsStep2_GET);
       WebServer->on("/st2", HTTP_POST, HandleSmartThingsStep2_POST);
+#endif //USE_SMARTTHINGS
       WebServer->on("/dl", HandleBackupConfiguration);
       WebServer->on("/sv", HandleSaveSettings);
       WebServer->on("/rs", HandleRestoreConfiguration);
@@ -1005,6 +1011,8 @@ void HandleOtherConfiguration()
   page += FPSTR(HTTP_BTN_CONF);
   ShowPage(page);
 }
+
+#ifdef USE_SMARTTHINGS
 void HandleSmartThingsSummary_GET()
 {
   if (HttpUser()) { return; }
@@ -1064,11 +1072,16 @@ void HandleSmartThingsStep2_GET()
 void HandleSmartThingsStep2_POST()
 {
   // do request to SmartThings to get the Access Token
+  
+  // then do request to SmartThings to get endpoint URI
+
+  // Save AccessToken and Endpoint
 
   // Then redirect to /st
   WebServer->sendHeader(F("Location"), String("st"), true);
   WebServer->send(302, FPSTR(HDR_CTYPE_PLAIN), "");
 }
+#endif //USE_SMARTTHINGS
 
 void HandleBackupConfiguration()
 {
